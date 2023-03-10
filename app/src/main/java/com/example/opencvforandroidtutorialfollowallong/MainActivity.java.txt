@@ -1,0 +1,128 @@
+package com.example.opencvforandroidtutorialfollowallong;
+
+import static org.opencv.imgproc.Imgproc.getRotationMatrix2D;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+import android.os.Bundle;
+import android.util.Log;
+import android.view.SurfaceView;
+
+import org.opencv.android.BaseLoaderCallback;
+import org.opencv.android.CameraActivity;
+import org.opencv.android.CameraBridgeViewBase;
+import org.opencv.android.LoaderCallbackInterface;
+import org.opencv.android.OpenCVLoader;
+import org.opencv.core.Core;
+import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint;
+import org.opencv.core.Point;
+import org.opencv.core.Scalar;
+import org.opencv.imgproc.Imgproc;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
+//OpenCV java in Android API 28 for Android 9 has the following MainActivity which displays a camera frame that is rotated correctly when the device is rotated 270 degrees but is not properly rotated when the phone is at any other angle. Adjust the code so that the frame always takes up the entire screen and is at the same angle that there is no rotation difference between the phone and the camera feed. ``
+
+public class MainActivity extends CameraActivity {
+
+    private static String LOG_TAG = "OpenCV_Log";
+    private CameraBridgeViewBase mOpenCvCameraView;
+
+    private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this){
+        @Override
+        public void onManagerConnected(int status){
+            switch (status){
+                case LoaderCallbackInterface.SUCCESS:{
+                    Log.v(LOG_TAG, "OpenCV Loaded");
+                    mOpenCvCameraView.enableView();
+                } break;
+                default:
+                {
+                    super.onManagerConnected(status);
+                } break;
+            }
+        }
+    };
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+//
+//        if(OpenCVLoader.initDebug()){
+//            Log.d(LOG_TAG, "OpenCV initialized");
+//        }
+        mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.opencv_surface_view);
+        mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
+        mOpenCvCameraView.setCvCameraViewListener(cvCameraViewListener);
+    }
+
+    @Override
+    protected List<?extends CameraBridgeViewBase> getCameraViewList(){
+        return Collections.singletonList(mOpenCvCameraView);
+    }
+
+    private CameraBridgeViewBase.CvCameraViewListener2 cvCameraViewListener = new CameraBridgeViewBase.CvCameraViewListener2() {
+
+        @Override
+        public void onCameraViewStarted(int width, int height) {
+
+        }
+
+        @Override
+        public void onCameraViewStopped() {
+
+        }
+
+        @Override
+        public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
+
+//            inputFrame = Core.rotate(inputFrame, inputFrame,Core.ROTATE_90_CLOCKWISE);
+            Mat input_rgba = inputFrame.rgba();
+            Mat input_gray = inputFrame.gray();
+//            Core.rotate(input_gray, input_gray, Core.ROTATE_90_CLOCKWISE);
+
+//            MatOfPoint corners = new MatOfPoint();
+//            Imgproc.goodFeaturesToTrack(input_gray, corners, 20, 0.01, 10, new Mat(), 3, false);
+//            Point[] cornerArray = corners.toArray();
+//
+//            for(int i = 0; i < corners.rows(); i++){
+//                Imgproc.circle(input_rgba, cornerArray[i], 10, new Scalar(0,255,0), 2);
+//            }
+
+            return input_gray;
+        }
+    };
+
+    @Override
+    public void onPause(){
+        super.onPause();
+        if(mOpenCvCameraView != null){
+            mOpenCvCameraView.disableView();
+        }
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+        if(!OpenCVLoader.initDebug()){
+//            mOpenCvCameraView.disableView();
+            Log.d(LOG_TAG, "OpenCV not found, Initializing");
+            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION, this, mLoaderCallback);
+        }else{
+            mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (mOpenCvCameraView != null) {
+            mOpenCvCameraView.disableView();
+        }
+    }
+
+}
