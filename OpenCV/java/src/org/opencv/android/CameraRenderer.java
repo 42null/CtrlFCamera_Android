@@ -168,4 +168,19 @@ public class CameraRenderer extends CameraGLRendererBase {
         mCamera.startPreview();
         mPreviewStarted = true;
     }
+
+
+
+//    @@@@@@
+//OrientationEventListener mOrientationListener = new OrientationEventListener(
+//        getApplicationContext()) {
+//    @Override
+//    public void onOrientationChanged(int orientation) {
+//
+//    }
+//};
+//
+//    if (mOrientationListener.canDetectOrientation()) {
+//        mOrientationListener.enable();
+//    }
 }

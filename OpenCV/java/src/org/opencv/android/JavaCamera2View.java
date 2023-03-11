@@ -319,6 +319,7 @@ public class JavaCamera2View extends CameraBridgeViewBase {
                     mCaptureSession.close();
                     mCaptureSession = null;
                 }
+//                @@@
                 createCameraPreviewSession();
             }
         } catch (RuntimeException e) {

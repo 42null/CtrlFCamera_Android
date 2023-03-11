@@ -3,7 +3,9 @@ package org.opencv.android;
 import java.lang.reflect.Method;
 import java.util.List;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.ImageFormat;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
@@ -11,6 +13,7 @@ import android.hardware.Camera.PreviewCallback;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.Surface;
 import android.view.ViewGroup.LayoutParams;
 
 import org.opencv.BuildConfig;
@@ -215,7 +218,29 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
 
                     /* Finally we are ready to start the preview */
                     Log.d(TAG, "startPreview");
-                    setDisplayOrientation(mCamera, 90);
+
+//                    TODO: Optimise
+                    int orientation = this.getResources().getConfiguration().orientation;
+
+                    int phoneOrientation = ((Activity)getContext()).getWindowManager().getDefaultDisplay().getRotation();
+                    int rotateDegrees = 0;
+//                    setDisplayOrientation(mCamera, 90);
+                    switch (phoneOrientation) {
+                        case Surface.ROTATION_0:
+                            rotateDegrees = 90;
+                            break;
+                        case Surface.ROTATION_90:
+                            rotateDegrees = 0;
+                            break;
+                        case Surface.ROTATION_180:
+                            rotateDegrees = 270;//TODO: Need to test on real phone with 180 flip
+                            break;
+                        case Surface.ROTATION_270:
+                            rotateDegrees = 180;
+                            break;
+                    }
+//                    mCamera.setDisplayOrientation(degrees);
+                    setDisplayOrientation(mCamera, rotateDegrees);
                     mCamera.setPreviewDisplay(getHolder());
                     mCamera.startPreview();
                 }
@@ -388,7 +413,11 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
     }
 
 
-
+    /**
+     * Code below is adapted from https://stackoverflow.com/a/16684505
+     * @param camera
+     * @param angle
+     */
     protected void setDisplayOrientation(Camera camera, int angle){
         Method downPolymorphic;
         try
